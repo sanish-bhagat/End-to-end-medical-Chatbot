@@ -14,8 +14,10 @@ app = Flask(__name__)
 load_dotenv()
 
 PINECONE_API_KEY=os.environ.get('PINECONE_API_KEY')
+GOOGLE_APPLICATION_CREDENTIALS=os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
 embeddings = download_hugging_face_embeddings()
 
@@ -29,8 +31,7 @@ docsearch = PineconeVectorStore.from_existing_index(
 retriever = docsearch.as_retriever(search_type='similarity', search_kwargs={'k': 3})
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",  # or "gemini-1.5-pro"
-    google_api_key="AIzaSyB2dq3W1FFQ93ZSx3R2N4lE7KN8MK1qVwk"
+    model="gemini-2.5-flash"
 )
 
 prompt = ChatPromptTemplate.from_messages(
@@ -55,6 +56,7 @@ def chat():
     response = rag_chain.invoke({'input': msg})
     print('Response: ', response['answer'])
     return str(response['answer'])
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
