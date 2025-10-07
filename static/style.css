@@ -9,9 +9,11 @@ body,html{
 .chat{
 	margin-top: auto;
 	margin-bottom: auto;
+	width: 80%;
+	max-width: 900px;
 }
 .card{
-	height: 500px;
+	height: 70vh;
 	border-radius: 15px !important;
 	background-color: rgba(0,0,0,0.4) !important;
 }
@@ -216,8 +218,24 @@ border-radius: 0 0 15px 15px !important;
 	cursor: pointer;
 	background-color: rgba(0,0,0,0.2);
 }
+@media (max-width: 768px) {
+    .chat {
+        width: 95%;
+        max-width: none;
+    }
+    .card {
+        height: 80vh;
+    }
+}
+
 @media(max-width: 576px){
 	.contacts_card{
 	margin-bottom: 15px !important;
 }
+    .chat {
+        width: 98%;
+    }
+    .card {
+        height: 85vh;
+    }
 }
