@@ -1,8 +1,9 @@
 from flask import Flask, render_template, jsonify, request
 from src.helper import download_hugging_face_embeddings
-from langchain_pinecone import PineconeVectorStore
+from langchain_pinecone import Pinecone
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.chains import create_retrieval_chain
+# from langchain import create_retrieval_chain
+from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
@@ -15,15 +16,17 @@ load_dotenv()
 
 PINECONE_API_KEY=os.environ.get('PINECONE_API_KEY')
 GOOGLE_APPLICATION_CREDENTIALS=os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
 
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
+os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 
 embeddings = download_hugging_face_embeddings()
 
 index_name="medicalbot"
 
-docsearch = PineconeVectorStore.from_existing_index(
+docsearch = Pinecone.from_existing_index(
     index_name = index_name,
     embedding=embeddings
 )
@@ -51,11 +54,16 @@ def index():
 @app.route("/get", methods=['GET', "POST"])
 def chat():
     msg = request.form['msg']
-    input = msg
-    print(input)
-    response = rag_chain.invoke({'input': msg})
-    print('Response: ', response['answer'])
-    return str(response['answer'])
+    print(f"Input: {msg}")
+    
+    # Collect all chunks from the stream
+    full_response = ""
+    for chunk in rag_chain.stream({'input': msg}):
+        if 'answer' in chunk:
+            full_response += chunk['answer']
+    
+    print('Response: ', full_response)
+    return str(full_response)
 
 
 if __name__ == '__main__':
